@@ -26,6 +26,9 @@ PARSER.add_argument("--token" , type = str)
 PARSER.add_argument("--applicationId" , type = str)
 PARSER.add_argument("--installedApplicationId" ,type=str)
 PARSER.add_argument("--recover" ,type=str)
+PARSER.add_argument("--host" ,type=str)
+PARSER.add_argument("--port" ,type=str)
+PARSER.add_argument("--databaseType" ,type=str)
 
 ARGS = PARSER.parse_args()
 
@@ -256,10 +259,14 @@ def main():
 	
 """ -----------------------------ACTIONS------------------------------"""
 
+HTTPS = "https://"
+HOST  = ARGS.host
+PORT  = ARGS.port 
 def GetProjectIdAction(project_name):
+	url = HTTPS+HOST+":"+PORT+"/api/2/projects"
 	try:
                 GetAllProject = Req.get(
-                "https://10.221.96.106:7070/api/2/projects",
+                 url,
                  headers={"X-Auth-Token": ARGS.token},
                	 verify =False
 		 )
@@ -275,9 +282,10 @@ def GetProjectIdAction(project_name):
 
 
 def CreateProjectAction(project_name):
+	url = HTTPS+HOST+":"+PORT+"/api/2/projects"
 	try:
                 CreateProjectresponse = Req.post(
-                "https://10.221.96.106:7070/api/2/projects",
+                 url,
                  json={"name":project_name},
 		 verify =False,
                  headers={"X-Auth-Token": ARGS.token}
@@ -294,9 +302,10 @@ def CreateProjectAction(project_name):
 	
 
 def CreateEnvAction(JSON):
+	url = HTTPS+HOST+":"+PORT+"/api/2/environments"
 	try:
 		CreateEnvironmentresponse = Req.post(
-        	"https://10.221.96.106:7070/api/2/environments",
+        	url,
 		json=JSON ,
                 verify =False,
 		headers={"X-Auth-Token":ARGS.token }
@@ -313,9 +322,10 @@ def CreateEnvAction(JSON):
 
 
 def GetApplicationListAction():
+	url = HTTPS+HOST+":"+PORT+"/api/2/applications"
 	try:
         	GetApplicationsListesponse = Req.get(
-		"https://10.221.96.106:7070/api/2/applications",
+		url,
 		params={"databaseType":"ORACLE"},
 		verify =False,
 		headers={"X-Auth-Token": ARGS.token}
@@ -325,15 +335,16 @@ def GetApplicationListAction():
 	except HTTPError as err:
 		return False ,err.response.text
  	except Exception as ExErr:
-		return False , err
+		return False , ExErr
 
 	return True , GetApplicationsListesponse
 
 
 def GetEnvironmentIdAction(project_id):
+	url = HTTPS+HOST+":"+PORT+"/api/2/environments"
 	try : 
 		GetEnvironmentIdResponse = Req.get(
-                "https://10.221.96.106:7070/api/2/environments",
+                url,
                 params={"projectId":project_id},
 		verify =False,
                 headers={"X-Auth-Token": ARGS.token}
@@ -350,9 +361,10 @@ def GetEnvironmentIdAction(project_id):
 
 
 def InstallApplicationAction(JSON):
+	url = HTTPS+HOST+":"+PORT+"/api/2/installations"
 	try:
 	        InstallApplicationresponse = Req.post(
-		"https://10.221.96.106:7070/api/2/installations",
+		url,
 		json = JSON,
 		 verify =False,
 		headers={"X-Auth-Token": ARGS.token}
@@ -369,10 +381,10 @@ def InstallApplicationAction(JSON):
 
 
 def RunMaskingJobAction(environmentId,installationId):
-	
+	url = HTTPS+HOST+":"+PORT+"/api/2/runs"
 	try:
         	RunMaskingresponse = Req.post(
-                 "https://10.221.96.106:7070/api/2/runs",
+                 url,
                  json = {"environmentId" :environmentId, "scenarioName" :ARGS.scenario_name},
                  params ={"installationId":installationId},
                  verify =False, 
@@ -391,10 +403,10 @@ def RunMaskingJobAction(environmentId,installationId):
 
 def GetInstallationIdAction(env_id):
 	
-
+	url = HTTPS+HOST+":"+PORT+'/api/2/installations/{}'.format(env_id)
 	try:
                 GetInstallationIdresponse = Req.get(
-                 'https://10.221.96.106:7070/api/2/installations/{}'.format(env_id),
+                 url,
                  headers={"X-Auth-Token": ARGS.token},
 		 verify =False
                  )
@@ -409,9 +421,10 @@ def GetInstallationIdAction(env_id):
 
 
 def GetJobStatusAction(run_id):
+	url = HTTPS+HOST+":"+PORT+'/api/2/runs/{}'.format(run_id)
 	try:
                 GetStatusresponse = Req.get(
-                 'https://10.221.96.106:7070/api/2/runs/{}'.format(run_id),
+                 url,
                  headers={"X-Auth-Token": ARGS.token},
                  verify = False
 		)

@@ -23,6 +23,9 @@ PARSER.add_argument("--token" , type = str)
 PARSER.add_argument("--applicationId" , type = str)
 PARSER.add_argument("--installedApplicationId" ,type=str)
 PARSER.add_argument("--recover" ,type=str)
+PARSER.add_argument("--host" ,type=str)
+PARSER.add_argument("--port" ,type=str)
+PARSER.add_argument("--databaseType" ,type=str)
 
 ARGS = PARSER.parse_args()
 
