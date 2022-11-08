@@ -90,7 +90,7 @@ def CreateEnv(project_id):
 	ENV_BODY ={
   		"projectId":project_id,
   		"name": ARGS.create_env,
-  		"type": "ORACLE",
+  		"type": ARGS.databaseType,
   		"parameters": [
     				{
       				"name": "DPF_TARGET_CONNECTION",
@@ -326,7 +326,7 @@ def GetApplicationListAction():
 	try:
         	GetApplicationsListesponse = Req.get(
 		url,
-		params={"databaseType":"ORACLE"},
+		params={"databaseType":ARGS.databaseType},
 		verify =False,
 		headers={"X-Auth-Token": ARGS.token}
 		)

@@ -50,7 +50,7 @@ def main():
                                 Flag , ENV_ID = GetEnvironmentId(PROJECT_ID,ARGS.env_name)
 				if Flag:                               
                                         Flag ,JOB_ID = RunMaskingJob(ENV_ID ,ARGS.installedApplicationId)
-                                       	
+       					                              	
 					if Flag:
 						print "Starting job..." 
                                                 GetJobStatus(JOB_ID)
@@ -74,7 +74,7 @@ def main():
 #TO GET THE INSTALLED APPLICATION IDs
         if ARGS.getInstalledApplicationId!=None and ARGS.project_name!=None and ARGS.env_name!=None:
                 flag ,projectId = GetProjectID(ARGS.project_name)
-                if flag==True:
+		if flag==True:
                         flag,EnvironmentId = GetEnvironmentId(projectId,ARGS.env_name)
                         if flag:
                                 flag , response =GetInstallationId (EnvironmentId)
@@ -104,7 +104,7 @@ def main():
                         return
                 print "\n"
                 flag,EnvironmentId = GetEnvironmentId(project_id,ARGS.create_env)
-                if flag:
+		if flag:
                         print "Envrironment with this name already exists in the project \n Environment ID : ",EnvironmentId
                 elif flag==False and EnvironmentId ==None:
                         print "Creating envrionement",ARGS.create_env
