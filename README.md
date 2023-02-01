@@ -16,7 +16,7 @@
          This API prints out the available installed application ID, status, and its database. 
         Following is the API and its parameter 
         
-         python3 -W ignore main.py --getInstalledApplicationId yes --project_name --env_name --host --port --token
+         python3 NetbackupMaskingUtility.py --getInstalledApplicationId yes --project_name --env_name --host --port --token
 
             - getInstalledApplicationId: Provide string input as yes
             - project_name: Provide string input of project name 
@@ -30,7 +30,7 @@
         This API masks the respective database table which is provided in the datprof environment with its user and host details. 
         Following is the API and its parameter
 
-        python3 -W ignore main.py --run yes --project_name --env_name --installedApplicationId --scenario_name --token --host --port 
+        python3 NetbackupMaskingUtility.py --run yes --project_name --env_name --installedApplicationId --scenario_name --token --host --port 
 
             - run: Provide string input as yes 
             - project name: Provide string input of project name 
@@ -48,7 +48,7 @@
         Following is the API and its parameter: 
 
 
-        python3 main.py --recover --mountpath 
+        python3 NetbackupMaskingUtility.py  --recover --mountpath 
 
             - recover: Provide string input as yes 
             - mountpath: Provide an absolute path of mount path where the backup files will be stored. 
@@ -58,11 +58,6 @@
 4. ### **Support**
         contact the datprof team for any support or queries 
         https://www.datprof.com/support/
-
-
-
-
-
     
        
          

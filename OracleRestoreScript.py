@@ -4,9 +4,11 @@ import subprocess as sp
 import time
 import datetime
 
-def Recovery(Output_file):
-
-	process=sp.Popen('/u01/app/oracle/product/19.0.0/dbhome_1/bin/rman target /',stdin=sp.PIPE,env=os.environ.copy(),stderr = sp.PIPE, stdout=Output_file,shell=True)
+def Recovery(Output_file,mountpath,PARAMcmd):
+	catalog = "catalog start with {0} noprompt;\n".format(mountpath)
+	catalog = bytes(catalog,encoding='utf-8')	
+	
+	process=sp.Popen('$ORACLE_HOME/bin/rman target /',stdin=sp.PIPE,env=os.environ.copy(),stderr = sp.PIPE, stdout=Output_file,shell=True)
 
 	process.stdin.write(b"shutdown immediate;\n")
 	process.stdin.flush()
@@ -14,7 +16,7 @@ def Recovery(Output_file):
 	process.stdin.write(b"startup mount;\n")
 	process.stdin.flush()
 
-	process.stdin.write(b"catalog start with '/home/oracle/oracle_backed_up1' noprompt;\n")
+	process.stdin.write(catalog)
 	process.stdin.flush()
 
 	process.stdin.write(b"restore database;\n")
@@ -22,7 +24,7 @@ def Recovery(Output_file):
 
 	process.stdin.write(b"run{\n")
 	process.stdin.write(b"allocate channel ch00 type SBT_TAPE\n")
-	process.stdin.write(b"PARMS='SBT_LIBRARY=/usr/openv/netbackup/bin/libobk.so64';\n")
+	process.stdin.write(PARAMcmd)
 	process.stdin.write(b"recover database;\n")
 	process.stdin.write(b"release channel ch00;\n")
 	process.stdin.write(b"}\n") 
@@ -40,22 +42,19 @@ def Recovery(Output_file):
 	if result !=0:
 		return False 
 	else:
-		return True 
-def main():
+		return True
 
+def check_nbu_dir():
+	cmd = "[ -d /usr/openv/netbackup ]"
+	p1 = sp.Popen(cmd,stdin=sp.PIPE,env=os.environ.copy(),stderr = sp.PIPE, stdout=sp.PIPE,shell=True)
+	p1.wait()
+	
+	if p1.returncode == 0:
+		print ("Netbackup Exists")
+		PARAMcmd =bytes( "PARMS='SBT_LIBRARY=/usr/openv/netbackup/bin/libobk.so64';\n",encoding='utf-8')
+		return PARAMcmd, True
 
-	rmanCMD = '/u01/app/oracle/product/19.0.0/dbhome_1/bin/rman target /'
-	FILENAME="Recovery_DB" + str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':', '_') + ".output"
-	Output_file=open(FILENAME, "w")
-	print ("Starting Oracle Recovery...")
-	Flag = Recovery(Output_file) 
-	if Flag:
-		print ("Recovery Operations Done")
 	else:
-		print ("Check Logs for Error")
+		print ("Netbackup doesnt Exist on this Machine")
 
-
-if __name__ == "__main__":
-        main()
-
-
+	return None, False

@@ -29,7 +29,7 @@ PARSER.add_argument("--recover" ,type=str)
 PARSER.add_argument("--host" ,type=str)
 PARSER.add_argument("--port" ,type=str)
 PARSER.add_argument("--databaseType" ,type=str)
-
+PARSER.add_argument("--mountpath" ,type=str)
 ARGS = PARSER.parse_args()
 
 
@@ -41,8 +41,8 @@ def CheckProjectExists(project_name):
 		return  False , response 	
 
 	if response.ok:
-        	for item in response.json():
-                	if project_name == item['name']:
+		for item in response.json():
+			if project_name == item['name']:
 				return True , None
 	return False , None
 
@@ -54,7 +54,7 @@ def CreateProject(project_name):
 		return False , response
 	
 	if response.ok:
-        	PROJECT_ID = response.json().get("id")
+		PROJECT_ID = response.json().get("id")
 
 	return True ,PROJECT_ID
 
@@ -92,14 +92,14 @@ def CreateEnv(project_id):
   		"name": ARGS.create_env,
   		"type": "ORACLE",
   		"parameters": [
-    				{
-      				"name": "DPF_TARGET_CONNECTION",
-      				"value": ARGS.connectString,
-      				"description": "ORACLE CONNECTION PARAMETERS",
-      				"type": "CONNECTIONSTRING",
-      				"environmentId": 0
-    				}
-			      ]
+					{
+	  				"name": "DPF_TARGET_CONNECTION",
+	  				"value": ARGS.connectString,
+	  				"description": "ORACLE CONNECTION PARAMETERS",
+	  				"type": "CONNECTIONSTRING",
+	  				"environmentId": 0
+					}
+				  ]
   		 }
 
 	temp = json.dumps(ENV_BODY)
@@ -121,12 +121,12 @@ def GetApplicationList():
 
 	Flag , response = GetApplicationListAction()
 	if not Flag:
-		return False,response    
+		return False,response	
 	
 	if response.ok:
-	        data =  response.json()
-                df = pd.DataFrame.from_dict(data)
-                print(tabulate(df[['id','name' ,'version' ,'databaseType']], headers="keys", tablefmt="psql", showindex=False))
+			data =  response.json()
+			df = pd.DataFrame.from_dict(data)
+			print(tabulate(df[['id','name' ,'version' ,'databaseType']], headers="keys", tablefmt="psql", showindex=False))
 	
 	return True ,None
 
@@ -184,78 +184,6 @@ def GetJobStatus(job_id):
 			print ("Job Completed")
 			break
 		
-
-def main():
-	
-#TO GET THE SAVED APPLCATION DETAILS
-	if ARGS.getApplicationId!=None:
-		flag , response = GetApplicationList()
-		if not flag:
-			print ("Error\n",response)
-		
-#TO GET THE INSTALLED APPLICATION IDs
-	if ARGS.getInstalledApplicationId!=None and ARGS.project_name!=None and ARGS.env_name!=None:
-                flag ,projectId = GetProjectID(ARGS.project_name)
-		if flag==True:
-			flag,EnvironmentId = GetEnvironmentId(projectId,ARGS.env_name)
-			if flag:
-				flag , response =GetInstallationId (EnvironmentId)
-			else:
-				print "Error fetching the Environment ID"
-		else:
-			print "Error fetching the project details"
-
-		
-         
-#TO CREATE PROJECT AND ENVIRONMENT AND INSTALL APPLICATION
-	if ARGS.create_project != None and ARGS.create_env != None and ARGS.install_application != None:
-		flag , project_id = GetProjectID(ARGS.create_project)
-		changeFlag = False		
-		if flag:
-			print "Project with this name already exists ID :" ,project_id
-		elif flag==False and project_id ==None:
-			print "Creating project",ARGS.create_project
-			flag , project_id = CreateProject(ARGS.create_project)
-			changeFlag = True
-			if flag:
-				print "Project created succesfully with ID :",project_id
-			else:
-				print project_id #error
-				return 
-		else:
-			print project_id #error 
-			return
-		print "\n"
-		flag,EnvironmentId = GetEnvironmentId(project_id,ARGS.create_env)
-		if flag:
-                        print "Envrironment with this name already exists in the project \n Environment ID : ",EnvironmentId
-                elif flag==False and EnvironmentId ==None:
-			print "Creating envrionement",ARGS.create_env
-                        flag,EnvironmentId = CreateEnv(project_id)
-			changeFlag = True
-                	if flag:
-                        	print  "Environment created succesfully \nEnvrionment ID :",EnvironmentId
-                	else:
-                        	print ("Error\n",EnvironmentId) 
-				return 
-		else:
-			print EnvironmentId #error
-			return 
-		
-		print "\n"
-		flag ,response = InstallApplication(EnvironmentId ,ARGS.applicationId)
-		if flag:
-			print ("Application installed Succesfully")
-			changeFlag=True
-		else:
-                        print ("Application Installation failed")
-			print ("Error\n",response)
-			return
-
-		if not changeFlag:
-			print ("Project and Environment has the required Application Installed , you can move ahead with the masking .")	
-
-                                               
 	
 """ -----------------------------ACTIONS------------------------------"""
 
@@ -265,32 +193,30 @@ PORT  = ARGS.port
 def GetProjectIdAction(project_name):
 	url = HTTPS+HOST+":"+PORT+"/api/2/projects"
 	try:
-                GetAllProject = Req.get(
-                 url,
-                 headers={"X-Auth-Token": ARGS.token},
-               	 verify =False
+				GetAllProject = Req.get(
+				 url,
+				 headers={"X-Auth-Token": ARGS.token},
+			   	 verify =False
 		 )
-                GetAllProject.raise_for_status()
+				GetAllProject.raise_for_status()
 	
 	except HTTPError as err:
 		return False , err.response.text
 	except Exception as ExErr:
-         	return False ,ExErr 
+		 	return False ,ExErr 
 
 	return True ,GetAllProject 
-
-
 
 def CreateProjectAction(project_name):
 	url = HTTPS+HOST+":"+PORT+"/api/2/projects"
 	try:
-                CreateProjectresponse = Req.post(
-                 url,
-                 json={"name":project_name},
+				CreateProjectresponse = Req.post(
+				 url,
+				 json={"name":project_name},
 		 verify =False,
-                 headers={"X-Auth-Token": ARGS.token}
-                 )
-                CreateProjectresponse.raise_for_status()
+				 headers={"X-Auth-Token": ARGS.token}
+				 )
+				CreateProjectresponse.raise_for_status()
 
 
 	except HTTPError as err:
@@ -305,11 +231,11 @@ def CreateEnvAction(JSON):
 	url = HTTPS+HOST+":"+PORT+"/api/2/environments"
 	try:
 		CreateEnvironmentresponse = Req.post(
-        	url,
+			url,
 		json=JSON ,
-                verify =False,
+				verify =False,
 		headers={"X-Auth-Token":ARGS.token }
-                )
+				)
 		CreateEnvironmentresponse.raise_for_status()
 
 
@@ -324,58 +250,55 @@ def CreateEnvAction(JSON):
 def GetApplicationListAction():
 	url = HTTPS+HOST+":"+PORT+"/api/2/applications"
 	try:
-        	GetApplicationsListesponse = Req.get(
+		GetApplicationsListesponse = Req.get(
 		url,
 		params={"databaseType":"ORACLE"},
 		verify =False,
 		headers={"X-Auth-Token": ARGS.token}
 		)
 		GetApplicationsListesponse.raise_for_status()
-	
+
 	except HTTPError as err:
 		return False ,err.response.text
- 	except Exception as ExErr:
-		return False , ExErr
-
+	except Exception as ExErr:
+		return False ,ExErr
 	return True , GetApplicationsListesponse
-
 
 def GetEnvironmentIdAction(project_id):
 	url = HTTPS+HOST+":"+PORT+"/api/2/environments"
 	try : 
 		GetEnvironmentIdResponse = Req.get(
-                url,
-                params={"projectId":project_id},
+		url,
+		params={"projectId":project_id},
 		verify =False,
-                headers={"X-Auth-Token": ARGS.token}
-                )
-                GetEnvironmentIdResponse.raise_for_status()
+		headers={"X-Auth-Token": ARGS.token}
+		)
+		GetEnvironmentIdResponse.raise_for_status()
 
 
 	except HTTPError as err:
-                return False , err.response.text
-        except Exception as ExErr:
-                return False , err
+		return False , err.response.text
+	except Exception as ExErr:
+		return False , err
 
-        return True , GetEnvironmentIdResponse
+	return True , GetEnvironmentIdResponse
 
 
 def InstallApplicationAction(JSON):
 	url = HTTPS+HOST+":"+PORT+"/api/2/installations"
 	try:
-	        InstallApplicationresponse = Req.post(
+		InstallApplicationresponse = Req.post(
 		url,
 		json = JSON,
-		 verify =False,
+		verify =False,
 		headers={"X-Auth-Token": ARGS.token}
 		)
 		InstallApplicationresponse.raise_for_status()
 
-
 	except HTTPError as err:
-        	return False ,err.response.text
+		return False ,err.response.text
 	except Exception as ExErr:
-        	return False , ExErr 
+		return False , ExErr 
 
 	return True, InstallApplicationresponse
 
@@ -383,20 +306,20 @@ def InstallApplicationAction(JSON):
 def RunMaskingJobAction(environmentId,installationId):
 	url = HTTPS+HOST+":"+PORT+"/api/2/runs"
 	try:
-        	RunMaskingresponse = Req.post(
-                 url,
-                 json = {"environmentId" :environmentId, "scenarioName" :ARGS.scenario_name},
-                 params ={"installationId":installationId},
-                 verify =False, 
+			RunMaskingresponse = Req.post(
+				 url,
+				 json = {"environmentId" :environmentId, "scenarioName" :ARGS.scenario_name},
+				 params ={"installationId":installationId},
+				 verify =False, 
 	   	 headers={"X-Auth-Token": ARGS.token}
-                 )
-        	RunMaskingresponse.raise_for_status()
+				 )
+			RunMaskingresponse.raise_for_status()
 
 
 	except HTTPError as err:
-       		return False ,err.response.text
+   		return False ,err.response.text
 	except Exception as ExErr:
-       		return False , ExErr
+   		return False , ExErr
 	
 	return True , RunMaskingresponse
 
@@ -405,15 +328,15 @@ def GetInstallationIdAction(env_id):
 	
 	url = HTTPS+HOST+":"+PORT+'/api/2/installations/{}'.format(env_id)
 	try:
-                GetInstallationIdresponse = Req.get(
-                 url,
-                 headers={"X-Auth-Token": ARGS.token},
+				GetInstallationIdresponse = Req.get(
+				 url,
+				 headers={"X-Auth-Token": ARGS.token},
 		 verify =False
-                 )
-                GetInstallationIdresponse.raise_for_status()
+				 )
+				GetInstallationIdresponse.raise_for_status()
 
 	except HTTPError as err:
-        	return False ,err.response.text
+		return False ,err.response.text
 	except Exception as ExErr:
 		return False, ExErr
 		
@@ -423,20 +346,17 @@ def GetInstallationIdAction(env_id):
 def GetJobStatusAction(run_id):
 	url = HTTPS+HOST+":"+PORT+'/api/2/runs/{}'.format(run_id)
 	try:
-                GetStatusresponse = Req.get(
-                 url,
-                 headers={"X-Auth-Token": ARGS.token},
-                 verify = False
+		GetStatusresponse = Req.get(
+		url,
+		headers={"X-Auth-Token": ARGS.token},
+		verify = False
 		)
-               	GetStatusresponse.raise_for_status()
+		GetStatusresponse.raise_for_status()
 
-        except HTTPError as err:
-                return False ,err.response.text
-        except Exception as ExErr:
-                return False, ExErr
+	except HTTPError as err:
+		return False ,err.response.text
+	except Exception as ExErr:
+		return False, ExErr
 
-        return True ,GetStatusresponse
-
-if __name__ == "__main__":
-	main()
+	return True ,GetStatusresponse
 
